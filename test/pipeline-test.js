@@ -106,69 +106,33 @@ describe('Pipeline: Rest - General', function() {
             pipe.createTest34.getAjaxSettings().xhrFields.withCredentials.should.equal(true);
         });
 
+        it('should test the add method', function() {
+            var pipeline = Pipeline();
 
-// // Pipeline to be used for all remaining tests
-// var pipeline = Pipeline([
-//         {
-//             name: "tasks"
-//         },
-//         {
-//             name: "tasksCustom",
-//             settings: {
-//                 recordId: "taskId"
-//             }
-//         },
-//         {
-//             name: "projects",
-//             settings: {
-//                 baseURL: "baseTest/"
-//             }
-//         },
-//         {
-//             name: "tags",
-//             settings: {
-//                 endpoint: "customEndPoint"
-//             }
-//         },
-//         {
-//             name: "users",
-//             settings: {
-//                 baseURL: "baseURL/",
-//                 endpoint: "customEndPoint"
-//             }
-//         },
-//         {
-//             name: "text",
-//             settings: {
-//                 contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-//                 dataType: "text"
-//             }
-//         }
-//     ]),
-//     pipe = pipeline.pipes.tasks,
-//     pipe2 = pipeline.pipes.tasksCustom,
-//     pipe3 = pipeline.pipes.projects,
-//     pipe4 = pipeline.pipes.tags,
-//     pipe5 = pipeline.pipes.users,
-//     textPipe = pipeline.pipes.text;
+            var pipe = pipeline.add( "addTest" ).pipes;
+            Object.keys( pipe ).length.should.equal(1);
+        });
 
-// // Add pipe test
-// test( "add method", function() {
-//     expect( 2 );
+        it('should test the remove method', function() {
+            var pipeline = Pipeline([
+                {
+                    name: "createTest31"
+                },
+                {
+                    name: "createTest32",
+                    settings: {
+                        recordId: "testId"
+                    }
+                }
+            ]);
 
-//     var pipe = pipeline.add( "addTest" ).pipes;
-//     equal( Object.keys( pipe ).length, 7, "Single Pipe added" );
-//     equal( Object.keys( pipe )[ 6 ], "addTest", "Pipe Name addTest" );
-// });
+            Object.keys( pipeline.pipes ).length.should.equal(2);
 
-// // Remove pipe test
-// test( "remove method", function() {
-//     expect( 2 );
 
-//     var pipe = pipeline.remove( "addTest" ).pipes;
-//     equal( Object.keys( pipe ).length, 6, "Single Pipe removed" );
-//     equal( pipe.addTest, undefined, "Removed pipe is really gone" );
-// });
+            pipeline.remove( 'createTest31' );
+
+            Object.keys( pipeline.pipes ).length.should.equal(1);
+        });
     });
 });
 
