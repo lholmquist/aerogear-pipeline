@@ -229,9 +229,48 @@ describe('Pipeline - Rest - Prototype Methods', function() {
 
             var pipeReturn = pipe.read();
 
-            //pipeReturn.should.be.instanceof(http.ClientRequest);
-
             pipeReturn.on( "error", function() {
+                done();
+            });
+        });
+    });
+    describe('save', function() {
+        it('should have a save method', function() {
+            var pipe = Pipeline("createTest").pipes.createTest;
+
+            should.exist(pipe.save);
+        });
+
+        it('should POST', function(done) {
+            var pipe = Pipeline({
+                        name: "createTest",
+                        settings: {
+                            baseURL: "http://localhost/"
+                        }
+                    }).pipes.createTest;
+
+            nock('http://localhost/')
+            .post('/createTest')
+            .reply(200, {});
+
+            pipe.save({ content: 'content' }, function( response ) {
+                done();
+            });
+        });
+
+        it('should PUT', function(done) {
+            var pipe = Pipeline({
+                        name: "createTest",
+                        settings: {
+                            baseURL: "http://localhost/"
+                        }
+                    }).pipes.createTest;
+
+            nock('http://localhost/')
+            .put('/createTest/1')
+            .reply(200, {});
+
+            pipe.save({ id: 1, content: 'content' }, function( response ) {
                 done();
             });
         });
