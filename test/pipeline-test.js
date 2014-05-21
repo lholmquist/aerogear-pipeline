@@ -86,24 +86,16 @@ describe('Pipeline: Rest - General', function() {
                     settings: {
                         recordId: "testId"
                     }
-                },
-                {
-                    name: "createTest34",
-                    type: "Rest",
-                    settings: {
-                        xhrFields: { withCredentials: true}
-                    }
-                }
+                 }
             ]).pipes;
 
-            Object.keys( pipe ).length.should.equal(4);
+            Object.keys( pipe ).length.should.equal(3);
             Object.keys( pipe )[ 0 ].should.equal("createTest31");
             Object.keys( pipe )[ 1 ].should.equal("createTest32");
             Object.keys( pipe )[ 2 ].should.equal("createTest33");
             pipe.createTest31.getRecordId().should.equal("id");
             pipe.createTest32.getRecordId().should.equal("testId");
             pipe.createTest33.getRecordId().should.equal("testId");
-            pipe.createTest34.getAjaxSettings().xhrFields.withCredentials.should.equal(true);
         });
 
         it('should test the add method', function() {
@@ -165,7 +157,11 @@ describe('Pipeline - Rest - Prototype Methods', function() {
             .get('/createTest')
             .reply(200, {});
 
-            pipe.read( function( response ) {
+            pipe.read( function( err, data, response ) {
+                if( err ) {
+                    done( err );
+                }
+
                 done();
             });
         });
@@ -183,7 +179,11 @@ describe('Pipeline - Rest - Prototype Methods', function() {
             .get('/createTest/1')
             .reply(200, {});
 
-            pipe.read({ id: 1 }, function( response ) {
+            pipe.read({ id: 1 }, function( err, data, response ) {
+                if( err ) {
+                    done( err );
+                }
+
                 done();
             });
         });
@@ -200,9 +200,17 @@ describe('Pipeline - Rest - Prototype Methods', function() {
 
             nock('http://localhost/')
             .get('/createTest/1')
-            .reply(200, {});
+            .reply(200, { customId: 1, contents: "I'm Data" });
 
-            pipe.read({ customId: 1 }, function( response ) {
+            pipe.read({ customId: 1 }, function( err, data, response ) {
+                if( err ) {
+                    done( err );
+                }
+
+                data.customId.should.equal(1);
+                data.contents.should.equal('I\'m Data');
+
+                response.statusCode.should.equal( 200 );
                 done();
             });
         });
@@ -214,7 +222,7 @@ describe('Pipeline - Rest - Prototype Methods', function() {
     //     ...
     // }
 
-        it('call read with no options and a callback - error', function(done) {
+        it('call read with no options and a callback - error - network error', function(done) {
             var pipe = Pipeline("createTest").pipes.createTest;
 
             pipe.read( function( err ) {
@@ -224,13 +232,34 @@ describe('Pipeline - Rest - Prototype Methods', function() {
             });
         });
 
-        it('call read with no options and no callback - using on error', function(done) {
+        it('call read with no options and no callback - using on error - network error', function(done) {
             var pipe = Pipeline("createTest").pipes.createTest;
 
             var pipeReturn = pipe.read();
 
             pipeReturn.on( "error", function() {
                 done();
+            });
+        });
+
+        it('call read with customId with options and a callback - error - non network error', function(done) {
+            var pipe = Pipeline(
+                    {
+                        name: "createTest",
+                        settings: {
+                            recordId: "customId",
+                            baseURL: "http://localhost/"
+                        }
+                    }).pipes.createTest;
+
+            nock('http://localhost/')
+            .get('/createTest/1')
+            .reply(404, {});
+
+            pipe.read({ customId: 1 }, function( err, data, response ) {
+                if( err ) {
+                    done();
+                }
             });
         });
     });
@@ -250,10 +279,17 @@ describe('Pipeline - Rest - Prototype Methods', function() {
                     }).pipes.createTest;
 
             nock('http://localhost/')
-            .post('/createTest')
-            .reply(200, {});
+            .post('/createTest', { content: 'content' })
+            .reply(201, { id: 1, content: 'content' });
 
-            pipe.save({ content: 'content' }, function( response ) {
+            pipe.save({ content: 'content' }, function( err, data, response ) {
+                if( err ) {
+                    done( err );
+                }
+
+                response.statusCode.should.equal(201);
+                data.id.should.equal(1);
+                data.content.should.equal('content');
                 done();
             });
         });
@@ -267,10 +303,16 @@ describe('Pipeline - Rest - Prototype Methods', function() {
                     }).pipes.createTest;
 
             nock('http://localhost/')
-            .put('/createTest/1')
-            .reply(200, {});
+            .put('/createTest/1', { id: 1, content: 'new content' })
+            .reply(204, {});
 
-            pipe.save({ id: 1, content: 'content' }, function( response ) {
+            pipe.save({ id: 1, content: 'new content' }, function( err, data, response ) {
+                if( err ) {
+                    done(err);
+                }
+
+                response.statusCode.should.equal(204);
+
                 done();
             });
         });
@@ -291,9 +333,17 @@ describe('Pipeline - Rest - Prototype Methods', function() {
                         }
                     }).pipes.createTest;
 
-            nock('http://localhost/').log(console.log).delete('/createTest/1').reply(200, {});
+            nock('http://localhost/')
+                .delete('/createTest/1')
+                .reply(204, {});
 
-            var req = pipe.remove({ id: 1, content: 'content' }, function( response ) {
+            var req = pipe.remove({ id: 1, content: 'content' }, function( err, data, response ) {
+                if( err ) {
+                    done( err );
+                }
+
+                response.statusCode.should.equal(204);
+
                 done();
             });
 
