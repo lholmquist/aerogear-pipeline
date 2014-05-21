@@ -275,4 +275,31 @@ describe('Pipeline - Rest - Prototype Methods', function() {
             });
         });
     });
+
+    describe('delete', function() {
+       it('should have a remove method', function() {
+            var pipe = Pipeline("createTest").pipes.createTest;
+
+            should.exist(pipe.remove);
+        });
+
+       it('should remove', function(done) {
+            var pipe = Pipeline({
+                        name: "createTest",
+                        settings: {
+                            baseURL: "http://localhost/"
+                        }
+                    }).pipes.createTest;
+
+            nock('http://localhost/').log(console.log).delete('/createTest/1').reply(200, {});
+
+            var req = pipe.remove({ id: 1, content: 'content' }, function( response ) {
+                done();
+            });
+
+            req.on('error', function(err){
+                done(err);
+            });
+        });
+    });
 });
