@@ -11,7 +11,8 @@
   "devDependencies": {
     "mocha": "^1.18.2",
     "should": "^3.3.1",
-    "nock": "^0.31.1"
+    "nock": "^0.31.1",
+    "jshint": "^2.5.1"
   },
   "dependencies": {
     "aerogear-core": "0.0.1"
